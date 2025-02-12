@@ -124,7 +124,7 @@ class App:
         )
 
     def open_server(self):
-        self.received_data = link.receiver(self.binary_label._text, int(self.port_entry.get()), self.ip_entry.get())
+        self.received_data = link.receiver(int(self.port_entry.get()))
         self.change_state('msg_received')
 # Inicia a interface gráfica
 if __name__ == "__main__":
