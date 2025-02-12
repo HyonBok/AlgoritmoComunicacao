@@ -60,6 +60,23 @@ class App:
 
         self.binary_label = ctk.CTkLabel(self.root, text="Binário:")
         self.binary_label.pack(pady=5)
+
+        # Conexão:
+        # Porta:
+        self.port_label = ctk.CTkLabel(self.root, text="Porta: ")
+        self.port_label.pack(pady=10)
+        self.port_entry = ctk.CTkEntry(self.root, width=300)
+        self.port_entry.pack(pady=10)
+
+        # IP:
+        self.ip_label = ctk.CTkLabel(self.root, text="IP: ")
+        self.ip_label.pack(pady=10)
+        self.ip_entry = ctk.CTkEntry(self.root, width=300)
+        self.ip_entry.pack(pady=10)
+
+        # Abrir conexão
+        self.connect_server = ctk.CTkButton(self.root, text="Conectar", command=self.connect_server)
+        self.connect_server.pack(pady=10)
         # Botão voltar
         self.back_button = ctk.CTkButton(self.root, text="Voltar", command=lambda: self.change_state('main'))
         self.back_button.pack(pady=10)
@@ -76,7 +93,7 @@ class App:
         self.port_label.pack(pady=10)
         self.port_entry = ctk.CTkEntry(self.root, width=300)
         self.port_entry.pack(pady=10)
-        # Botão voltar
+        # Abrir conexão
         self.open_server = ctk.CTkButton(self.root, text="Abrir conexão", command=self.open_server)
         self.open_server.pack(pady=10)
 
@@ -84,8 +101,11 @@ class App:
         self.back_button = ctk.CTkButton(self.root, text="Voltar", command=lambda: self.change_state('main'))
         self.back_button.pack(pady=10)
 
+    def connect_server(self):
+        link.sender()
+
     def open_server(self):
-        link.receiver(int(self.port_entry.get()))
+        link.receiver(self.binary_label._text, int(self.port_entry.get()), self.ip_entry.get())
 
 # Inicia a interface gráfica
 if __name__ == "__main__":
