@@ -24,9 +24,3 @@ def mlt3_decode(mlt3):
             bin.append(1)
         last = value
     return bin
-
-mlt3 = mlt3_encode([1,1,0,1,0,0,1,1])
-bin = mlt3_decode(mlt3)
-
-print(mlt3)
-print(bin)
