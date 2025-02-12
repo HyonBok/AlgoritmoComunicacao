@@ -1,6 +1,7 @@
 import socket
 import time
-
+import json
+# 192.168.15.14
 # Configuração do servidor
 HOST_SERVER = '0.0.0.0'
 
@@ -25,17 +26,20 @@ def receiver(port):
                 data = conn.recv(1024)  # Receber até 1024 bytes
                 if not data:
                     break
-                print(f"Recebido: {data.decode()}")
                 conn.sendall(data)  # Enviar os dados de volta (eco)
-                return data
+                lista = json.loads(data.decode('utf-8'))
+                print(f"Recebido: {lista}")
+
+                return lista
 
 def sender(data, port, host):
     # Criando o socket do cliente
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         client_socket.connect((host, port))  # Conectar ao servidor
-        client_socket.sendall(data)  # Enviar dados
-        data = client_socket.recv(1024)  # Receber a resposta
+        data_bytes = json.dumps([-1, 0, 1]).encode('utf-8')
+        client_socket.sendall(data_bytes) # Enviar dados
+        data = client_socket.recv(1024).decode('utf-8')  # Receber a resposta
+        lista = json.loads(data)
+    print(f"Recebido do servidor: {lista}")
 
-    print(f"Recebido do servidor: {data.decode()}")
-# data = str(data).encode()
-# sender(data)
+
