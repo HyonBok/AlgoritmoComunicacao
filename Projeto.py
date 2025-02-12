@@ -1,32 +1,97 @@
 import customtkinter as ctk
+import os
+import encryption
+import link
+import socket
 
-def encrypt_message():
-    message = entry.get()
-    encrypted_text = message  # Apenas copia o texto por enquanto
-    encrypted_label.configure(text=f"Criptografado: {encrypted_text}")
-    binary_label.configure(text=f"Binário: {' '.join(format(ord(c), '08b') for c in encrypted_text)}")
+class App:
+    def __init__(self, root):
+        # Gera uma chave aleatória de 256 bits (32 bytes)
+        self.key = os.urandom(32)
+        
+        # Configuração da janela
+        self.root = root
+        self.root.title("Algoritmo")
+        self.root.geometry("600x400")
+        self.main()
+    # métodos de botões:
+    def encrypt_button_click(self):
+        # Obtém o texto da entrada e chama a função de criptografia
+        encrypted_text = encryption.encrypt_message(self.entry.get(), self.key)
+        
+        # Atualiza os rótulos com o texto criptografado e sua representação binária
+        self.encrypted_label.configure(text=f"Criptografado: {encrypted_text}")
+        
+        # Converte os caracteres criptografados para binário e atualiza o rótulo binário
+        binary_text = ' '.join(format(ord(c), '08b') for c in encrypted_text)
+        self.binary_label.configure(text=f"Binário: {binary_text}")
 
-# Configuração da janela
-ctk.set_appearance_mode("dark")  # Tema escuro
-ctk.set_default_color_theme("blue")
-root = ctk.CTk()
-root.title("Algoritmo")
-root.geometry("600x400")
+    def change_state(self, state):
+        # Limpa a tela
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        if state == 'sender':
+            self.sender()
+        if state == 'receiver':
+            self.receiver()
+        if state == 'main':
+            self.main()
 
-# Campo de entrada
-entry = ctk.CTkEntry(root, width=300)
-entry.pack(pady=10)
+    # Estados:
+    def main(self):
+        # Botões para Receptor e Emissor
+        self.sender_button = ctk.CTkButton(self.root, text="Emissor", command=lambda: self.change_state('sender'))
+        self.sender_button.pack(pady=10)
 
-# Botão para criptografar
-encrypt_button = ctk.CTkButton(root, text="Criptografar", command=encrypt_message)
-encrypt_button.pack(pady=10)
+        self.receiver_button = ctk.CTkButton(self.root, text="Receptor", command=lambda: self.change_state('receiver'))
+        self.receiver_button.pack(pady=10)
+    def sender(self):
+        # Campo de entrada
+        self.entry = ctk.CTkEntry(self.root, width=300)
+        self.entry.pack(pady=10)
+        
+        # Botão para criptografar
+        self.encrypt_button = ctk.CTkButton(self.root, text="Criptografar", command=self.encrypt_button_click)
+        self.encrypt_button.pack(pady=10)
+        
+        # Labels para exibir os resultados
+        self.encrypted_label = ctk.CTkLabel(self.root, text="Criptografado:")
+        self.encrypted_label.pack(pady=5)
 
-# Labels para exibir os resultados
-encrypted_label = ctk.CTkLabel(root, text="Criptografado:")
-encrypted_label.pack(pady=5)
+        self.binary_label = ctk.CTkLabel(self.root, text="Binário:")
+        self.binary_label.pack(pady=5)
+        # Botão voltar
+        self.back_button = ctk.CTkButton(self.root, text="Voltar", command=lambda: self.change_state('main'))
+        self.back_button.pack(pady=10)
 
-binary_label = ctk.CTkLabel(root, text="Binário:")
-binary_label.pack(pady=5)
+    def receiver(self):
+        # Pega o endereço ip:
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        self.ip_label = ctk.CTkLabel(self.root, text=f"Endereço IP: {ip_address}")
+        self.ip_label.pack(pady=10)
+
+        # Porta:
+        self.port_label = ctk.CTkLabel(self.root, text="Porta: ")
+        self.port_label.pack(pady=10)
+        self.port_entry = ctk.CTkEntry(self.root, width=300)
+        self.port_entry.pack(pady=10)
+        # Botão voltar
+        self.open_server = ctk.CTkButton(self.root, text="Abrir conexão", command=self.open_server)
+        self.open_server.pack(pady=10)
+
+        # Botão voltar
+        self.back_button = ctk.CTkButton(self.root, text="Voltar", command=lambda: self.change_state('main'))
+        self.back_button.pack(pady=10)
+
+    def open_server(self):
+        link.receiver(int(self.port_entry.get()))
 
 # Inicia a interface gráfica
-root.mainloop()
+if __name__ == "__main__":
+    ctk.set_appearance_mode("dark")  # Tema escuro
+
+    # Cria a janela principal e passa para a classe
+    root = ctk.CTk()
+    app = App(root)
+    root.mainloop()

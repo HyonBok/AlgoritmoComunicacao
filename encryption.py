@@ -48,10 +48,10 @@ key = os.urandom(32)
 # Mensagem a ser criptografada
 message = "Esta é uma mensagem secreta."
 
-# Criptografa a mensagem
-encrypted_message = encrypt_message(message, key)
-print(f"Mensagem criptografada: {encrypted_message}")
+# # Criptografa a mensagem
+# encrypted_message = encrypt_message(message, key)
+# print(f"Mensagem criptografada: {encrypted_message}")
 
-# Descriptografa a mensagem
-decrypted_message = decrypt_message(encrypted_message, key)
-print(f"Mensagem descriptografada: {decrypted_message}")
+# # Descriptografa a mensagem
+# decrypted_message = decrypt_message(encrypted_message, key)
+# print(f"Mensagem descriptografada: {decrypted_message}")
