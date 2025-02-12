@@ -109,7 +109,7 @@ class App:
         self.back_button.pack(pady=10)
 
     def msg_received(self):
-        self.binary_label.configure(text=f"Binário: {mlt3.mlt3_decode(self.received_data)}")
+        self.binary_label = ctk.CTkLabel(self.root, text=f"Binário: {mlt3.mlt3_decode(self.received_data)}")
         self.binary_label.pack(pady=10)
         self.encrypted_label.configure(text=f"Descriptografado : {encryption.decrypt_message(self.binary_label._text, self.key)}")
         self.encrypted_label.pack(pady=10)

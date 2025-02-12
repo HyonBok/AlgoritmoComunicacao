@@ -36,7 +36,7 @@ def sender(data, port, host):
     # Criando o socket do cliente
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         client_socket.connect((host, port))  # Conectar ao servidor
-        data_bytes = json.dumps([-1, 0, 1]).encode('utf-8')
+        data_bytes = json.dumps(data).encode('utf-8')
         client_socket.sendall(data_bytes) # Enviar dados
         data = client_socket.recv(1024).decode('utf-8')  # Receber a resposta
         lista = json.loads(data)
