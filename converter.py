@@ -5,5 +5,6 @@ def binary_to_text(binary):
     return text_result
 
 def text_to_binary(text):
+    print(text)
     binary_result = ' '.join(format(ord(char), '08b') for char in text)
     return binary_result

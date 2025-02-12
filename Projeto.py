@@ -45,7 +45,7 @@ class App:
 
     # Estados:
     def main(self):
-        
+
         # Botões para Receptor e Emissor
         self.sender_button = ctk.CTkButton(self.root, text="Emissor", command=lambda: self.change_state('sender'))
         self.sender_button.pack(pady=10)
@@ -113,7 +113,7 @@ class App:
         self.binary_label.pack(pady=10)
         self.encrypted_label.configure(text=f"Descriptografado : {encryption.decrypt_message(self.binary_label._text, self.key)}")
         self.encrypted_label.pack(pady=10)
-        self.msg_label = ctk.CTkLabel(self.root, text=converter.text_to_binary(self.encrypted_label._text))
+        self.msg_label = ctk.CTkLabel(self.root, text=converter.binary_to_text(self.encrypted_label._text))
         self.msg_label.pack(pady=10)
 
     def connect_server(self):
