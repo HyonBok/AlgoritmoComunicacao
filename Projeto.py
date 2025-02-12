@@ -1,6 +1,16 @@
 import customtkinter as ctk
-import matlab.engine
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+# Variável para armazenar a referência ao canvas do gráfico
+current_canvas = None
+
+def on_close():
+    # Aqui você pode cancelar eventos ou destruir objetos
+    if current_canvas:
+        current_canvas.get_tk_widget().destroy()
+    root.quit()  # Finaliza o loop de eventos do Tkinter
+    root.destroy()  # Fecha a janela do Tkinter
 
 def encrypt_message():
     message = entry.get()
@@ -12,24 +22,41 @@ def encrypt_message():
     # Converte os dados binários em uma lista de inteiros
     values = [int(bit) for bit in binary_representation.replace(' ', '')]
 
-    matlab_graph(values)
+    # Gerar o gráfico
+    generate_graph(values)
     
-def matlab_graph(values):
-    # Converte para o formato adequado do MATLAB (matlab.double)
-    matlab_values = matlab.double(values)
+def generate_graph(values):
+    global current_canvas
+
+    # Se já existir um gráfico, destrua o canvas antigo
+    if current_canvas:
+        current_canvas.get_tk_widget().destroy()
+
+    # Cria a figura e o gráfico
+    fig, ax = plt.subplots(figsize=(5, 3))  # Ajuste o tamanho conforme necessário
+    ax.step(range(len(values)), values, where='post', color='b')
     
-    # Gerar gráfico no MATLAB
-    eng = matlab.engine.start_matlab()
+    # Ajuste os limites do gráfico
+    ax.set_ylim(-1.5, 2)  # Para ter um limite maior para visualização
+    ax.set_title('Representação Onda Quadrada')
+    ax.set_xlabel('Posição')
+    ax.set_ylabel('Valor Binário')
     
-    # Criação do gráfico da onda quadrada
-    eng.figure(nargout=0)
-    eng.stairs(matlab_values, nargout=0)  # Usando stairs para criar a onda quadrada
-    eng.title('Representação Onda Quadrada')
-    eng.xlabel('Posição')
-    eng.ylabel('Valor')
-    eng.grid(True, nargout=0)
-    eng.yticks([-1, 0, 1], nargout=0)  # Ajuste do eixo Y para incluir valores -1, 0, 1
-    eng.quit()
+    # Configura os ticks do eixo Y
+    ax.set_yticks([-1, 0, 1])
+
+    # Ajustar para não cortar a legenda
+    fig.tight_layout(pad=3.0)  # Adiciona mais espaço entre o gráfico e a legenda
+
+    # Embede o gráfico no Tkinter
+    canvas = FigureCanvasTkAgg(fig, master=frame)  # frame é o frame do Tkinter onde o gráfico será exibido
+    canvas.draw()
+    
+    # Posiciona o canvas na parte inferior da tela
+    canvas.get_tk_widget().pack(side="bottom", pady=10, fill="both", expand=True)
+    
+    # Atualiza a referência do canvas atual
+    current_canvas = canvas
 
 # Configuração da janela
 ctk.set_appearance_mode("dark")  # Tema escuro
@@ -53,5 +80,12 @@ encrypted_label.pack(pady=5)
 binary_label = ctk.CTkLabel(root, text="Binário:")
 binary_label.pack(pady=5)
 
+# Frame para o gráfico
+frame = ctk.CTkFrame(root)
+frame.pack(pady=20, fill="both", expand=True)
+
+root.protocol("WM_DELETE_WINDOW", on_close)
+
 # Inicia a interface gráfica
 root.mainloop()
+
