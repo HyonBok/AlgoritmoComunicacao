@@ -1,13 +1,13 @@
-# Recebe um binário e retorna um vetor com valores em [-1, 0, 1]
+# Recebe um binário e retorna um vetor com valores em [0, 1, 2]
 def mlt3_encode(bin):
     mlt3 = []
-    last = 0
+    last = 1
     adder = 1
     for bit in bin:
-        if bit == 0:
+        if bit == '0':
             mlt3.append(last)
         else:
-            if (last == 1 or last == -1):
+            if (last == 2 or last == 0):
                 adder = -adder
             mlt3.append(last + adder)
             last = last + adder
@@ -16,7 +16,7 @@ def mlt3_encode(bin):
 
 def mlt3_decode(mlt3):
     bin = []
-    last = 0
+    last = 1
     for value in mlt3:
         if value == last:
             bin.append(0)
