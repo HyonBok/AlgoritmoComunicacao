@@ -2,11 +2,12 @@ import customtkinter as ctk
 import os
 import socket
 import json
-
 import encryption
 import converter
 import link
 import mlt3
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class App:
     def __init__(self, root):
@@ -16,13 +17,17 @@ class App:
         # Configuração da janela
         self.root = root
         self.root.title("Algoritmo")
-        self.root.geometry("600x400")
+        self.root.geometry("800x800")  # Definindo a altura mínima da janela para 800px (Caber o gráfico)
         self.main()
 
         self.encrypted = None
         self.binary = None
         self.mlt = None
-    # métodos de botões:
+
+        self.fig = None  # Variável para armazenar o gráfico
+        self.current_canvas = None  # Inicialização de current_canvas como None
+
+    # Métodos de botões:
     def encrypt_button_click(self):
         # Obtém o texto da entrada e chama a função de criptografia
         encrypted_text = encryption.encrypt_message(self.entry.get(), self.key)
@@ -33,6 +38,37 @@ class App:
         # Converte os caracteres criptografados para binário e atualiza o rótulo binário
         self.binary = converter.text_to_binary(encrypted_text)
         self.binary_label.configure(text=self.binary) # Colocar espaçamento entre 8 bits
+
+        self.generate_graph()
+
+    def generate_graph(self):
+        if self.current_canvas:
+            self.current_canvas.get_tk_widget().destroy()
+
+        encode = mlt3.mlt3_encode(self.binary_label._text)
+        encode = [x - 1 for x in encode]
+
+        # Cria a figura e o gráfico
+        fig, ax = plt.subplots(figsize=(5, 3))  # Ajuste o tamanho conforme necessário
+        ax.step(range(len(encode)), encode, where='post', color='b')
+        
+        # Ajuste os limites do gráfico
+        ax.set_ylim(-1.5, 2)  # Para ter um limite maior para visualização
+        ax.set_title('Representação Onda Quadrada')
+        ax.set_xlabel('Posição')
+        ax.set_ylabel('Valor Binário')
+
+        # Configura os ticks do eixo Y
+        ax.set_yticks([-1, 0, 1])
+        # Ajustar para não cortar a legenda
+        fig.tight_layout(pad=3.0)  # Adiciona mais espaço entre o gráfico e a legenda
+        # Embede o gráfico no Tkinter
+        canvas = FigureCanvasTkAgg(fig, master=self.root)  # frame é o frame do Tkinter onde o gráfico será exibido
+        canvas.draw()
+
+        # Armazena o canvas atual para poder destruir o anterior, se necessário
+        self.current_canvas = canvas
+        canvas.get_tk_widget().pack()  # Exibe o gráfico na janela
 
     def change_state(self, state):
         # Limpa a tela
@@ -140,6 +176,11 @@ class App:
     def open_server(self):
         self.received_data = link.receiver(int(self.port_entry.get()))
         self.change_state('msg_received')
+
+def fechar_app():
+    root.quit()  # Finaliza o loop de eventos de forma segura
+    root.destroy()  # Libera os recursos de forma limpa
+
 # Inicia a interface gráfica
 if __name__ == "__main__":
     ctk.set_appearance_mode("dark")  # Tema escuro
@@ -147,4 +188,5 @@ if __name__ == "__main__":
     # Cria a janela principal e passa para a classe
     root = ctk.CTk()
     app = App(root)
+    root.protocol("WM_DELETE_WINDOW", fechar_app)
     root.mainloop()
