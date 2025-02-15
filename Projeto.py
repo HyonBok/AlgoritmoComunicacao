@@ -148,14 +148,14 @@ class App:
         self.back_button = ctk.CTkButton(self.root, text="Voltar", command=lambda: self.change_state('main'))
         self.back_button.pack(pady=10)
 
-    # def test_receiver(self, data):
-    #     self.received_data = data
-    #     self.binary_label = ctk.CTkLabel(self.root, text=mlt3.mlt3_decode(self.received_data))
-    #     # self.binary_label.pack(pady=10)
-    #     self.encrypted_label = ctk.CTkLabel(self.root, text=encryption.decrypt_message(self.binary_label._text, self.key))
-    #     # self.encrypted_label.pack(pady=10)
-    #     self.msg_label = ctk.CTkLabel(self.root, text=converter.binary_to_text(self.encrypted_label._text))
-    #     # self.msg_label.pack(pady=10)
+    def test_receiver(self, data):
+        self.received_data = data
+        self.binary_label = ctk.CTkLabel(self.root, text=mlt3.mlt3_decode(self.received_data))
+        self.binary_label.pack(pady=10)
+        self.encrypted_label = ctk.CTkLabel(self.root, text=encryption.decrypt_message(''.join(str(num) for num in self.binary_label._text), self.key))
+        self.encrypted_label.pack(pady=10)
+        self.msg_label = ctk.CTkLabel(self.root, text=converter.binary_to_text(self.encrypted_label._text))
+        self.msg_label.pack(pady=10)
 
     def msg_received(self):
         self.binary_label = ctk.CTkLabel(self.root, text=mlt3.mlt3_decode(self.received_data))
@@ -166,12 +166,12 @@ class App:
         self.msg_label.pack(pady=10)
 
     def connect_server(self):
-        # self.test_receiver(mlt3.mlt3_encode(self.binary_label._text))
-        link.sender(
-            mlt3.mlt3_encode(self.binary_label._text),
-            int(self.port_entry.get()),
-            self.ip_entry.get()
-        )
+        self.test_receiver(mlt3.mlt3_encode(self.binary_label._text))
+        # link.sender(
+        #     mlt3.mlt3_encode(self.binary_label._text),
+        #     int(self.port_entry.get()),
+        #     self.ip_entry.get()
+        # )
 
     def open_server(self):
         self.received_data = link.receiver(int(self.port_entry.get()))
