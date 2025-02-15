@@ -160,7 +160,7 @@ class App:
     def msg_received(self):
         self.binary_label = ctk.CTkLabel(self.root, text=mlt3.mlt3_decode(self.received_data))
         self.binary_label.pack(pady=10)
-        self.encrypted_label = ctk.CTkLabel(self.root, text=encryption.decrypt_message(self.binary_label._text, self.key))
+        self.encrypted_label = ctk.CTkLabel(self.root, text=encryption.decrypt_message(''.join(str(num) for num in self.binary_label._text), self.key))
         self.encrypted_label.pack(pady=10)
         self.msg_label = ctk.CTkLabel(self.root, text=converter.binary_to_text(self.encrypted_label._text))
         self.msg_label.pack(pady=10)
