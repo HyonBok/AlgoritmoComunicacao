@@ -50,26 +50,52 @@ class App:
         encode = [int(x) - 1 for x in code]
 
         # Cria a figura e o gráfico
-        fig, ax = plt.subplots(figsize=(5, 3))  # Ajuste o tamanho conforme necessário
-        ax.step(range(len(encode)), encode, where='post', color='b')
-        
+        self.fig, self.ax = plt.subplots(figsize=(5, 3))  # Ajuste o tamanho conforme necessário
+        self.ax.step(range(len(encode)), encode, where='post', color='b')
+
         # Ajuste os limites do gráfico
-        ax.set_ylim(-1.5, 2)  # Para ter um limite maior para visualização
-        ax.set_title('Representação Onda Quadrada')
-        ax.set_xlabel('Posição')
-        ax.set_ylabel('Valor Binário')
+        self.ax.set_ylim(-1.5, 2)  # Para ter um limite maior para visualização
+        self.ax.set_title('Representação Onda Quadrada')
+        self.ax.set_xlabel('Posição')
+        self.ax.set_ylabel('Valor Binário')
 
         # Configura os ticks do eixo Y
-        ax.set_yticks([-1, 0, 1])
+        self.ax.set_yticks([-1, 0, 1])
+
         # Ajustar para não cortar a legenda
-        fig.tight_layout(pad=3.0)  # Adiciona mais espaço entre o gráfico e a legenda
+        self.fig.tight_layout(pad=3.0)  # Adiciona mais espaço entre o gráfico e a legenda
+        
         # Embede o gráfico no Tkinter
-        canvas = FigureCanvasTkAgg(fig, master=self.root)  # frame é o frame do Tkinter onde o gráfico será exibido
-        canvas.draw()
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)  # frame é o frame do Tkinter onde o gráfico será exibido
+        self.canvas.draw()
 
         # Armazena o canvas atual para poder destruir o anterior, se necessário
-        self.current_canvas = canvas
-        canvas.get_tk_widget().pack()  # Exibe o gráfico na janela
+        self.current_canvas = self.canvas
+        self.canvas.get_tk_widget().pack()  # Exibe o gráfico na janela
+
+        # Conectar eventos de zoom e movimento
+        self.canvas.mpl_connect("scroll_event", self.on_scroll_or_move)  # Conecta o evento de scroll
+
+    def on_scroll_or_move(self, event):
+        """Zoom com a roda do mouse ou movimento horizontal com Shift + Scroll."""
+        if self.current_canvas is None or not self.fig:  # Verifica se há um gráfico
+            return  # Não faz nada se não houver gráfico
+
+        # Verifica se a tecla Shift está pressionada durante o scroll
+        if 'shift' in event.modifiers:  # 'shift' estará presente em event.modifiers
+            # Movimento horizontal com Shift + Scroll
+            direction = 1 if event.step > 0 else -1
+            xlim = self.ax.get_xlim()
+            new_xlim = [xlim[0] + direction * 0.05 * (xlim[1] - xlim[0]), 
+                        xlim[1] + direction * 0.05 * (xlim[1] - xlim[0])]
+            self.ax.set_xlim(new_xlim)  # Ajusta os limites horizontais
+            self.canvas.draw()
+        else:
+            # Zoom normal com a roda do mouse
+            xlim = self.ax.get_xlim()
+            zoom_factor = 0.9 if event.step > 0 else 1.1  # Aproxima com scroll up, afasta com scroll down
+            self.ax.set_xlim([event.xdata + (x - event.xdata) * zoom_factor for x in xlim])
+            self.canvas.draw()
 
     def change_state(self, state):
         # Limpa a tela
