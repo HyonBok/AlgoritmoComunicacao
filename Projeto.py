@@ -11,8 +11,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class App:
     def __init__(self, root):
-        # Gera uma chave aleatória de 256 bits (32 bytes)
-        self.key = os.urandom(32)
+        # Chave estática
+        self.key = 256 * b'\x02' # Chave de 256 bytes com o valor 2
         
         # Configuração da janela
         self.root = root
