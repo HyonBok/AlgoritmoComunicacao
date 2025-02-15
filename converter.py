@@ -10,4 +10,3 @@ def binary_to_text(binary):
 def text_to_binary(text):
     binary_result = ''.join(format(ord(char), '08b') for char in text)  # Sem espaços
     return binary_result
-

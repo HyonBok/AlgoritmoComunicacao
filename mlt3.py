@@ -23,4 +23,5 @@ def mlt3_decode(mlt3):
         else:
             bin.append(1)
         last = value
-    return bin
+
+    return ''.join(str(num) for num in bin)
