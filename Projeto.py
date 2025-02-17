@@ -17,7 +17,7 @@ class App:
         # Configuração da janela
         self.root = root
         self.root.title("Algoritmo")
-        self.root.geometry("800x800")  # Definindo a altura mínima da janela para 800px (Caber o gráfico)
+        self.root.geometry(f"{2000}x{1100}+{-10}+{-10}")  # Definindo a altura mínima da janela para 800px (Caber o gráfico)
         self.main()
 
         self.encrypted = None
@@ -49,8 +49,8 @@ class App:
         # encode = mlt3.mlt3_encode(self.binary_label._text)
         encode = [int(x) - 1 for x in code]
 
-        # Cria a figura e o gráfico
-        self.fig, self.ax = plt.subplots(figsize=(5, 3))  # Ajuste o tamanho conforme necessário
+        # Cria a figura e o gráfico com tamanho maior
+        self.fig, self.ax = plt.subplots(figsize=(10, 6))  # Ajuste o tamanho conforme necessário
         self.ax.step(range(len(encode)), encode, where='post', color='b')
 
         # Ajuste os limites do gráfico
@@ -66,7 +66,7 @@ class App:
         self.fig.tight_layout(pad=3.0)  # Adiciona mais espaço entre o gráfico e a legenda
         
         # Embede o gráfico no Tkinter
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)  # frame é o frame do Tkinter onde o gráfico será exibido
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.results_frame)  # frame é o frame do Tkinter onde o gráfico será exibido
         self.canvas.draw()
 
         # Armazena o canvas atual para poder destruir o anterior, se necessário
@@ -113,51 +113,80 @@ class App:
     # Estados:
     def main(self):
 
-        # Botões para Receptor e Emissor
-        self.sender_button = ctk.CTkButton(self.root, text="Emissor", command=lambda: self.change_state('sender'))
-        self.sender_button.pack(pady=10)
+        # Título da tela
+        self.title_label = ctk.CTkLabel(self.root, text="Tela Inicial", font=("Arial", 80), text_color="white")
+        self.title_label.pack(pady=100)
 
-        self.receiver_button = ctk.CTkButton(self.root, text="Receptor", command=lambda: self.change_state('receiver'))
-        self.receiver_button.pack(pady=10)
+        # Frame para centralizar os botões
+        self.center_frame = ctk.CTkFrame(self.root)
+        self.center_frame.place(relx=0.5, rely=0.5, anchor='center')
+
+        # Botões para Receptor e Emissor
+        self.sender_button = ctk.CTkButton(self.center_frame, text="Emissor", command=lambda: self.change_state('sender'), width=200, height=50, fg_color="green")
+        self.sender_button.pack(pady=40, padx=20)
+
+        self.receiver_button = ctk.CTkButton(self.center_frame, text="Receptor", command=lambda: self.change_state('receiver'), width=200, height=50, fg_color="green")
+        self.receiver_button.pack(pady=40, padx=20)
+
+        # Botão para fechar a aplicação
+        self.quit_button = ctk.CTkButton(self.center_frame, text="Fechar", command=fechar_app, width=200, height=50, fg_color="red")
+        self.quit_button.pack(pady=40, padx=20)
+
     def sender(self):
-        # Campo de entrada
-        self.entry = ctk.CTkEntry(self.root, width=300)
+        
+        # Frame para a entrada e criptografia
+        entry_frame = ctk.CTkFrame(self.root)
+        entry_frame.place(relx=0.2, rely=0.3, anchor='center')
+
+        # Campo de entrada com texto de placeholder
+        self.entry_label = ctk.CTkLabel(entry_frame, text="Mensagem:")
+        self.entry_label.pack(pady=5)
+        self.entry = ctk.CTkEntry(entry_frame, width=280, placeholder_text="Digite a Mensagem")
         self.entry.pack(pady=10)
         
         # Botão para criptografar
-        self.encrypt_button = ctk.CTkButton(self.root, text="Criptografar", command=self.encrypt_button_click)
+        self.encrypt_button = ctk.CTkButton(entry_frame, text="Criptografar", command=self.encrypt_button_click)
         self.encrypt_button.pack(pady=10)
-        
-        # Labels para exibir os resultados
-        self.encrypted_label_title = ctk.CTkLabel(self.root, text="Criptografado:")
-        self.encrypted_label = ctk.CTkLabel(self.root, text="")
-        self.encrypted_label_title.pack(pady=5)
-        self.encrypted_label.pack(pady=5)
 
-        self.binary_label_title = ctk.CTkLabel(self.root, text="Binário:")
-        self.binary_label = ctk.CTkLabel(self.root, text="")
-        self.binary_label_title.pack(pady=5)
-        self.binary_label.pack(pady=5)
+        # Frame para a conexão
+        connection_frame = ctk.CTkFrame(self.root)
+        connection_frame.place(relx=0.2, rely=0.5, anchor='center')
 
-        # Conexão:
         # Porta:
-        self.port_label = ctk.CTkLabel(self.root, text="Porta: ")
-        self.port_label.pack(pady=10)
-        self.port_entry = ctk.CTkEntry(self.root, width=300)
-        self.port_entry.pack(pady=10)
+        self.port_label = ctk.CTkLabel(connection_frame, text="Porta: ")
+        self.port_label.grid(row=0, column=0, padx=10, pady=10, sticky='e')
+        self.port_entry = ctk.CTkEntry(connection_frame, width=200)
+        self.port_entry.grid(row=0, column=1, padx=10, pady=10)
 
         # IP:
-        self.ip_label = ctk.CTkLabel(self.root, text="IP: ")
-        self.ip_label.pack(pady=10)
-        self.ip_entry = ctk.CTkEntry(self.root, width=300)
-        self.ip_entry.pack(pady=10)
-
+        self.ip_label = ctk.CTkLabel(connection_frame, text="IP: ")
+        self.ip_label.grid(row=1, column=0, padx=10, pady=10, sticky='e')
+        self.ip_entry = ctk.CTkEntry(connection_frame, width=200)
+        self.ip_entry.grid(row=1, column=1, padx=10, pady=10)
+        
         # Abrir conexão
-        self.connect_server = ctk.CTkButton(self.root, text="Conectar", command=self.connect_server)
-        self.connect_server.pack(pady=10)
+        self.connect_server = ctk.CTkButton(connection_frame, text="Conectar", command=self.connect_server)
+        self.connect_server.grid(row=2, column=0, columnspan=2, pady=10)
+
+        # Frame para os resultados com tamanho mínimo
+        self.results_frame = ctk.CTkFrame(self.root)
+        self.results_frame.place(relx=0.7, rely=0.47, anchor='center')
+
+        # Labels para exibir os resultados
+        self.encrypted_label_title = ctk.CTkLabel(self.results_frame, text="Criptografado:", font=("Arial", 16, "italic"), text_color="cyan")
+        self.encrypted_label = ctk.CTkLabel(self.results_frame, text="", font=("Arial", 14), text_color="white")
+        self.encrypted_label_title.pack(pady=10)
+        self.encrypted_label.pack(pady=10)
+
+        self.binary_label_title = ctk.CTkLabel(self.results_frame, text="Binário:", font=("Arial", 16, "italic"), text_color="cyan")
+        self.binary_label = ctk.CTkLabel(self.results_frame, text="", wraplength=900, font=("Arial", 14), text_color="white")  # Define wraplength para quebrar a linha
+        self.binary_label_title.pack(pady=10)
+        self.binary_label.pack(pady=10)
+
         # Botão voltar
-        self.back_button = ctk.CTkButton(self.root, text="Voltar", command=lambda: self.change_state('main'))
+        self.back_button = ctk.CTkButton(self.results_frame, text="Voltar", command=lambda: self.change_state('main'))
         self.back_button.pack(pady=10)
+
 
     def receiver(self):
         # Pega o endereço ip:
@@ -214,12 +243,12 @@ class App:
         self.back_button.pack(pady=10)
 
     def connect_server(self):
-        self.test_receiver(mlt3.mlt3_encode(self.binary_label._text))
-        # link.sender(
-        #     mlt3.mlt3_encode(self.binary_label._text),
-        #     int(self.port_entry.get()),
-        #     self.ip_entry.get()
-        # )
+        #self.test_receiver(mlt3.mlt3_encode(self.binary_label._text))
+        link.sender(
+            mlt3.mlt3_encode(self.binary_label._text),
+            int(self.port_entry.get()),
+            self.ip_entry.get()
+        )
 
     def open_server(self):
         self.received_data = link.receiver(int(self.port_entry.get()))

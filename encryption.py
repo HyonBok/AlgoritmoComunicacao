@@ -13,7 +13,7 @@ def encrypt_message(message, key):
     """
     
     # Gerar um sal aleatório
-    salt = os.urandom(16)
+    salt = os.urandom(6)
 
     # Usar a chave e o sal para criar uma chave mais segura 
     #   - (HMAC -> Hash-based Message Authentication Code - Código de Autenticação de Mensagem Baseado em Hash)
@@ -46,8 +46,8 @@ def decrypt_message(encrypted_message, key):
     """
 
     # Extrair o sal da mensagem criptografada
-    salt = bytes.fromhex(encrypted_message[:32])
-    encrypted_message = encrypted_message[32:]
+    salt = bytes.fromhex(encrypted_message[:12])
+    encrypted_message = encrypted_message[12:]
     
     # Usar a chave e o sal para criar uma chave mais segura
     secure_key = hashlib.pbkdf2_hmac('sha256', key, salt, 100000)
