@@ -38,11 +38,12 @@ class App:
         
         # Converte os caracteres criptografados para binário e atualiza o rótulo binário
         self.binary = converter.text_to_binary(encrypted_text)
-        self.binary_label.configure(text=self.binary) # Colocar espaçamento entre 8 bits
+        formatted_binary = ' '.join([self.binary[i:i+4] for i in range(0, len(self.binary), 4)])
+        self.binary_label.configure(text=formatted_binary) # Colocar espaçamento entre 4 bits
 
-        self.generate_graph(mlt3.mlt3_encode(self.binary_label._text))
+        self.generate_graph(mlt3.mlt3_encode(self.binary_label._text), self.results_frame)
 
-    def generate_graph(self, code):
+    def generate_graph(self, code, results_frame):
         if self.current_canvas:
             self.current_canvas.get_tk_widget().destroy()
 
@@ -66,7 +67,7 @@ class App:
         self.fig.tight_layout(pad=3.0)  # Adiciona mais espaço entre o gráfico e a legenda
         
         # Embede o gráfico no Tkinter
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.results_frame)  # frame é o frame do Tkinter onde o gráfico será exibido
+        self.canvas = FigureCanvasTkAgg(self.fig, master=results_frame)  # frame é o frame do Tkinter onde o gráfico será exibido
         self.canvas.draw()
 
         # Armazena o canvas atual para poder destruir o anterior, se necessário
@@ -209,23 +210,44 @@ class App:
         self.back_button.pack(pady=10)
 
     def test_receiver(self, data):
+
         # Limpa a tela
         for widget in self.root.winfo_children():
             widget.destroy()
+        
         self.received_data = data
-        self.binary_label = ctk.CTkLabel(self.root, text=mlt3.mlt3_decode(self.received_data))
+
+        # Frame para os resultados
+        self.results_frame = ctk.CTkFrame(self.root)
+        self.results_frame.place(relx=0.20, rely=0.45, anchor='center')
+
+        # Gráfico
+        graphics_frame = ctk.CTkFrame(self.root)
+        graphics_frame.place(relx=0.71, rely=0.46, anchor='center')
+
+        self.generate_graph(self.received_data, graphics_frame)
+
+        # Labels para exibir os resultados
+        self.binary_label_title = ctk.CTkLabel(self.results_frame, text="Binário Recebido:", font=("Arial", 16, "italic"), text_color="cyan")
+        binary_text = mlt3.mlt3_decode(self.received_data)
+        formatted_binary = ' '.join([binary_text[i:i+4] for i in range(0, len(binary_text), 4)])
+        self.binary_label = ctk.CTkLabel(self.results_frame, text=formatted_binary, wraplength=500, font=("Arial", 14), text_color="white")
+        self.binary_label_title.pack(pady=10)
         self.binary_label.pack(pady=10)
 
-        self.msg_label = ctk.CTkLabel(self.root, text=converter.binary_to_text(self.binary_label._text))
+        self.msg_label_title = ctk.CTkLabel(self.results_frame, text="Mensagem Decodificada:", font=("Arial", 16, "italic"), text_color="cyan")
+        self.msg_label = ctk.CTkLabel(self.results_frame, text=converter.binary_to_text(self.binary_label._text), wraplength=900, font=("Arial", 14), text_color="white")
+        self.msg_label_title.pack(pady=10)
         self.msg_label.pack(pady=10)
 
-        self.encrypted_label = ctk.CTkLabel(self.root, text=encryption.decrypt_message((self.msg_label._text), self.key))
+        self.encrypted_label_title = ctk.CTkLabel(self.results_frame, text="Mensagem Decriptografada:", font=("Arial", 16, "italic"), text_color="cyan")
+        self.encrypted_label = ctk.CTkLabel(self.results_frame, text=encryption.decrypt_message((self.msg_label._text), self.key), wraplength=900, font=("Arial", 14), text_color="white")
+        self.encrypted_label_title.pack(pady=10)
         self.encrypted_label.pack(pady=10)
 
-        self.generate_graph(self.received_data)
         # Botão voltar
-        self.back_button = ctk.CTkButton(self.root, text="Voltar", command=lambda: self.change_state('receiver'))
-        self.back_button.pack(pady=10)
+        self.back_button = ctk.CTkButton(self.results_frame, text="Voltar", command=lambda: self.change_state('receiver'))
+        self.back_button.pack(pady=20)
 
     def msg_received(self):
         self.binary_label = ctk.CTkLabel(self.root, text=mlt3.mlt3_decode(self.received_data))
@@ -243,12 +265,12 @@ class App:
         self.back_button.pack(pady=10)
 
     def connect_server(self):
-        #self.test_receiver(mlt3.mlt3_encode(self.binary_label._text))
-        link.sender(
-            mlt3.mlt3_encode(self.binary_label._text),
-            int(self.port_entry.get()),
-            self.ip_entry.get()
-        )
+        self.test_receiver(mlt3.mlt3_encode(self.binary_label._text))
+        # link.sender(
+        #     mlt3.mlt3_encode(self.binary_label._text),
+        #     int(self.port_entry.get()),
+        #     self.ip_entry.get()
+        # )
 
     def open_server(self):
         self.received_data = link.receiver(int(self.port_entry.get()))

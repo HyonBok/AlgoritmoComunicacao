@@ -6,7 +6,7 @@ def mlt3_encode(bin):
     for bit in bin:
         if bit == '0':
             mlt3.append(last)
-        else:
+        elif bit == '1':
             if (last == 2 or last == 0):
                 adder = -adder
             mlt3.append(last + adder)
